@@ -2,7 +2,7 @@
     <x-admin-nav />
 
     <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6"
-         x-data="{ pestana: new URLSearchParams(location.search).get('tab') || '{{ $menus->first()?->tipo_menu ?? 'universitario' }}' }">
+         x-data="{ pestana: '{{ $menus->first()?->tipo_menu ?? 'universitario' }}' }">
         <x-flash-message />
 
         <header class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
@@ -68,12 +68,6 @@
                     'entrada' => ['1. Entradas', 'Añadir entrada', 'bg-uch-blue/10 text-uch-blue'],
                     'fondo' => ['2. Platos principales', 'Añadir plato principal', 'bg-uch-teal/15 text-uch-teal'],
                     'refresco' => ['3. Refrescos', 'Añadir refresco', 'bg-uch-cyan/15 text-[#0060A9]'],
-                ];
-
-                $etiquetasNuevo = [
-                    'entrada' => ['Añadir entrada nueva', 'Nombre de la nueva entrada'],
-                    'fondo' => ['Añadir plato principal nuevo', 'Nombre del nuevo plato principal'],
-                    'refresco' => ['Añadir bebida nueva', 'Nombre de la nueva bebida'],
                 ];
 
                 $capacidadTotal = $menu->opciones->where('habilitado', true)->sum('stock_raciones');
@@ -184,37 +178,7 @@
                                      seleccionados: @js($estadoComponentes[$tiempo] ?? []),
                                      nombres: @js($nombresComponentes[$tiempo] ?? []),
                                      abierto: false,
-                                     expandido: {{ $tiempo === 'refresco' ? 'false' : 'true' }},
-                                     nuevoAbierto: false,
-                                     nuevoNombre: '',
-                                     errorNuevo: '',
-                                     guardandoNuevo: false,
-                                     async crear() {
-                                         const nombre = this.nuevoNombre.trim();
-                                         if (nombre === '') { this.errorNuevo = 'Escribe un nombre.'; return; }
-                                         this.guardandoNuevo = true;
-                                         this.errorNuevo = '';
-                                         try {
-                                             const respuesta = await fetch('/admin/menus/{{ $menu->id }}/componentes', {
-                                                 method: 'POST',
-                                                 headers: {
-                                                     'Content-Type': 'application/json',
-                                                     'Accept': 'application/json',
-                                                     'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content
-                                                 },
-                                                 body: JSON.stringify({ tiempo: '{{ $tiempo }}', nombre })
-                                             });
-                                             if (respuesta.ok) {
-                                                 window.location.href = '/admin/menus?tab={{ $menu->tipo_menu }}';
-                                                 return;
-                                             }
-                                             const datos = await respuesta.json().catch(() => ({}));
-                                             this.errorNuevo = datos.errors?.nombre?.[0] ?? 'No se pudo crear. Inténtalo de nuevo.';
-                                         } catch (e) {
-                                             this.errorNuevo = 'Sin conexión. Inténtalo de nuevo.';
-                                         }
-                                         this.guardandoNuevo = false;
-                                     }
+                                     expandido: {{ $tiempo === 'refresco' ? 'false' : 'true' }}
                                  }"
                                  class="flex flex-col gap-3 rounded-card border border-uch-border bg-uch-surface p-4 shadow-uch-card">
                                 <div class="flex items-center justify-between gap-2 {{ $tiempo === 'fondo' ? 'border-b border-uch-border/70 pb-2' : '' }}">
@@ -256,30 +220,6 @@
                                                 @empty
                                                     <p class="px-2 py-1.5 text-body-sm text-uch-muted">No hay componentes de este tiempo.</p>
                                                 @endforelse
-
-                                                <div class="mt-1 border-t border-dashed border-uch-border pt-2">
-                                                    <button type="button" x-show="! nuevoAbierto"
-                                                            @click="nuevoAbierto = true; $nextTick(() => $refs.nuevoNombre.focus())"
-                                                            class="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-label-md font-bold text-uch-blue hover:bg-uch-bg">
-                                                        <span class="material-symbols-outlined text-[18px]">add_circle</span>
-                                                        {{ $etiquetasNuevo[$tiempo][0] }}
-                                                    </button>
-
-                                                    <div x-show="nuevoAbierto" x-cloak class="flex flex-col gap-2 px-1 pb-1">
-                                                        <input x-ref="nuevoNombre" x-model="nuevoNombre" type="text" maxlength="120"
-                                                               @keydown.enter.prevent="crear()"
-                                                               placeholder="{{ $etiquetasNuevo[$tiempo][1] }}"
-                                                               class="w-full rounded-lg border-uch-border bg-uch-surface px-3 py-2 text-body-sm text-uch-navy focus:border-uch-blue focus:ring-uch-blue">
-                                                        <p x-show="errorNuevo" x-text="errorNuevo" class="text-body-sm font-semibold text-uch-coral-dark"></p>
-                                                        <p class="text-body-sm text-uch-muted">Guarda antes tus cambios pendientes: al crear se recarga la página.</p>
-                                                        <div class="flex justify-end gap-2">
-                                                            <button type="button" @click="nuevoAbierto = false; errorNuevo = ''"
-                                                                    class="rounded-lg bg-uch-bg px-3 py-1.5 text-label-md font-semibold text-uch-navy hover:bg-uch-border">Cancelar</button>
-                                                            <button type="button" @click="crear()" :disabled="guardandoNuevo"
-                                                                    class="rounded-lg bg-uch-navy px-3 py-1.5 text-label-md font-semibold text-white hover:bg-uch-blue disabled:opacity-50">Crear y añadir</button>
-                                                        </div>
-                                                    </div>
-                                                </div>
                                             </div>
                                         </div>
                                     </div>

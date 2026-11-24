@@ -247,7 +247,6 @@ class ProductoController extends Controller
             'descripcion' => 'nullable|string',
             'alergenos' => 'nullable|string|max:150',
             'precio' => 'required|numeric|min:0',
-            'stock_actual' => 'required|integer|min:0',
             'stock_minimo' => 'required|integer|min:0',
             'imagen' => 'nullable|string|max:500',
             'imagen_archivo' => 'nullable|file|image|mimes:jpg,jpeg,png,webp|max:2048',
@@ -260,7 +259,6 @@ class ProductoController extends Controller
         unset($datos['imagen_archivo']);
 
         $imagenSubida = $this->guardarImagenProducto($request);
-        $stockAnterior = (int) $producto->stock_actual;
 
         $producto->update([
             ...$datos,
@@ -273,25 +271,6 @@ class ProductoController extends Controller
             'es_nuevo' => $request->boolean('es_nuevo'),
             'es_popular' => $request->boolean('es_popular'),
         ]);
-
-        // Si el stock cambió desde la edición, queda trazado en el historial de movimientos.
-        $diferencia = (int) $producto->stock_actual - $stockAnterior;
-
-        if ($diferencia !== 0) {
-            InventarioMovimiento::create([
-                'tipo_item' => InventarioMovimiento::TIPO_PRODUCTO,
-                'item_id' => $producto->id,
-                'operacion' => $diferencia > 0
-                    ? InventarioMovimiento::OPERACION_INGRESO
-                    : InventarioMovimiento::OPERACION_SALIDA,
-                'cantidad' => abs($diferencia),
-                'stock_anterior' => $stockAnterior,
-                'stock_nuevo' => (int) $producto->stock_actual,
-                'motivo_categoria' => 'Corrección',
-                'comentario' => 'Ajuste desde la edición del producto',
-                'usuario_id' => auth()->id(),
-            ]);
-        }
 
         return redirect('/admin/productos')->with('mensaje', 'Producto actualizado correctamente.');
     }

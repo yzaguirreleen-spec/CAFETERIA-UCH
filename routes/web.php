@@ -62,7 +62,6 @@ Route::middleware(['auth', 'rol:administrador'])->group(function () {
     Route::get('/admin/menus', [MenuDiaController::class, 'index']);
     Route::put('/admin/menus/{menu}', [MenuDiaController::class, 'update']);
     Route::patch('/admin/menus/{menu}/toggle', [MenuDiaController::class, 'toggle']);
-    Route::post('/admin/menus/{menu}/componentes', [MenuDiaController::class, 'crearComponente']);
 
     Route::get('/admin/componentes', [MenuComponenteController::class, 'index']);
     Route::get('/admin/componentes/crear', [MenuComponenteController::class, 'create']);
