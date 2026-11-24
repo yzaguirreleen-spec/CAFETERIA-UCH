@@ -28,7 +28,7 @@ class ProductoController extends Controller
         $categorias = Categoria::activas()->get();
 
         $ordenMenus = ['universitario' => 0, 'ejecutivo' => 1, 'dieta' => 2];
-        $menus = MenuDia::with(['opciones.componente', 'imagenes'])
+        $menus = MenuDia::with(['opciones.componente'])
             ->activos()
             ->get()
             ->sortBy(fn (MenuDia $menu): int => $ordenMenus[$menu->tipo_menu] ?? 99)
@@ -85,20 +85,6 @@ class ProductoController extends Controller
                     ->all();
             }
 
-            // Carrusel: una imagen por plato principal habilitado, en el orden definido por el administrador.
-            $fondosHabilitados = $menu->opciones
-                ->filter(fn ($opcion): bool => $opcion->habilitado && $opcion->componente?->tiempo === 'fondo')
-                ->pluck('componente.nombre', 'componente_id');
-
-            $carrusel = $menu->imagenes
-                ->filter(fn ($imagen): bool => $fondosHabilitados->has($imagen->componente_id))
-                ->map(fn ($imagen): array => [
-                    'url' => $imagen->url,
-                    'nombre' => $fondosHabilitados[$imagen->componente_id],
-                ])
-                ->values()
-                ->all();
-
             return [
                 'id' => $menu->id,
                 'tipo' => $menu->tipo_menu,
@@ -108,7 +94,6 @@ class ProductoController extends Controller
                 'imagen' => $menu->imagen
                     ? '/'.ltrim($menu->imagen, '/')
                     : asset('images/productos/quinua.svg'),
-                'carrusel' => $carrusel,
                 'destacado' => (bool) $menu->destacado,
                 'esPrecioVariable' => (bool) $menu->es_precio_variable,
                 'precioBase' => (float) $menu->precio_base,

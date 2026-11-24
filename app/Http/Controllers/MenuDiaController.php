@@ -18,7 +18,7 @@ class MenuDiaController extends Controller
     {
         $orden = ['universitario' => 0, 'ejecutivo' => 1, 'dieta' => 2];
 
-        $menus = MenuDia::with(['opciones.componente', 'imagenes'])
+        $menus = MenuDia::with(['opciones.componente'])
             ->get()
             ->sortBy(fn (MenuDia $menu): int => $orden[$menu->tipo_menu] ?? 99)
             ->values();
