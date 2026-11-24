@@ -42,8 +42,13 @@ class ProductoControllerTest extends TestCase
                 ->contains(fn ($producto) => $producto['id'] === $disponible->id && $producto['stock'] === 4 && $producto['disponible'] === true)
                 && collect($productos)->contains(fn ($producto) => $producto['id'] === $agotado->id && $producto['disponible'] === false))
             ->assertViewHas('menuHero', fn ($hero) => $hero['id'] === $menu->id && $hero['titulo'] === 'Menú Universitario')
-            ->assertSee('GRUPO HASP SERVICE')
-            ->assertSee('Pide tu almuerzo en línea y recógelo en caja sin hacer cola.')
+            ->assertSee('Tu almuerzo UCH, listo sin hacer cola')
+            ->assertSee('OFERTA DE HOY')
+            ->assertSee('Menús armables de 3 tiempos')
+            ->assertSee('Al paso y Combos')
+            ->assertSee('FILTRAR POR')
+            ->assertSee('ORDENAR POR')
+            ->assertSee('Mostrando')
             ->assertDontSee('Menú semanal');
     }
 
